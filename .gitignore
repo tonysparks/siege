@@ -1,0 +1,5 @@
+bin/siege.exe
+.vscode/c_cpp_properties.json
+.vscode/settings.json
+bin/siege.pdb
+bin/siege.ilk
