@@ -66,7 +66,7 @@ Game* gameInit(GameConfig* config) {
     game->window = window;
     game->isRunning = 0;
 
-    textureLoad(game, &tex, "./assets/gfx/german.png");
+    textureLoad(game, &tex, "../assets/gfx/german.png");
 
     return game;
 }
