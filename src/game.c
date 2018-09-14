@@ -1,7 +1,28 @@
 #include "game.h"
 #include "common.h"
+#include "renderer.h"
 
 #include "SDL.h"
+#include "SDL_image.h"
+
+static Texture tex = {0};    
+
+static void gameUpdate(Game* game) {
+
+}
+
+static void gameRender(Game* game) {
+    SDL_RenderClear(game->renderer);
+
+    SDL_Rect dest = {
+        20, 90, tex.width, tex.height
+    };
+
+    SDL_RenderCopy(game->renderer, tex.tex, NULL, &dest);
+
+    SDL_RenderPresent(game->renderer);
+}
+
 
 Game* gameInit(GameConfig* config) {    
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -10,8 +31,7 @@ Game* gameInit(GameConfig* config) {
 	}
 
 	if(!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
-		logger(FATAL_LEVEL, "Unable to Init hinting: %s", SDL_GetError());
-        return NULL;
+		logger(ERROR_LEVEL, "Unable to Init hinting: %s", SDL_GetError());        
 	}
 
     SDL_Window* window = NULL;
@@ -34,12 +54,19 @@ Game* gameInit(GameConfig* config) {
 
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 
+    if(!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+		logger(FATAL_LEVEL, "Unable to init SDL_image: %s", IMG_GetError());
+		return NULL;
+	}
+
     Game* game = (Game*)siegeMalloc(sizeof(Game));
     game->config = config;
     game->renderer = renderer;
     game->surface = surface;
     game->window = window;
     game->isRunning = 0;
+
+    textureLoad(game, &tex, "./assets/gfx/german.png");
 
     return game;
 }
@@ -57,8 +84,11 @@ void  gameFree(Game* game) {
         siegeFree(game);
     }
 
+    IMG_Quit();
     SDL_Quit();
 }
+
+
 void  gameRun(Game* game) {
     if(game->isRunning) {
         return;
@@ -76,5 +106,12 @@ void  gameRun(Game* game) {
                 }
             }
         }
+
+        // update
+        gameUpdate(game);
+
+        // render
+        gameRender(game);
     }
 }
+

@@ -13,6 +13,7 @@
 
 #include "common.c"
 #include "game.c"
+#include "renderer.c"
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmdLine, int nCmdShow) {
     
@@ -22,8 +23,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmdLin
         .title = "Logistic Siege"
     };
 
+    OutputDebugStringA("Hello World");
     Game* game = gameInit(&config);
-
+    
     gameRun(game);
     gameFree(game);
     return 0;

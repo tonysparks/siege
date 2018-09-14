@@ -11,13 +11,18 @@ void logger(LogLevel level, const char* format, ...) {
     va_list args;
     va_start(args, format);
     switch(level) {
-        default:
+        default: {
             vfprintf(stderr, format, args);
+            vfprintf(stdout, format, args);
+            OutputDebugStringA(format);
+        }
     }
     va_end(args);
     fputs("\n", stderr);
 
-    exit(2);
+    if(level == FATAL_LEVEL) {
+        exit(2);
+    }
 }
 
 

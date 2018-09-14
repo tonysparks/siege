@@ -10,6 +10,11 @@ typedef enum LogLevel {
 
 void logger(LogLevel level, const char* format, ...);
 
+typedef enum Maybe {
+    OK,
+    FAILED,
+} Maybe;
+
 void* siegeMalloc(size_t size);
 void* siegeCalloc(size_t count, size_t size);
 void* siegeRealloc(void* ptr, size_t newSize);
