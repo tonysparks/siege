@@ -3,3 +3,4 @@ bin/siege.exe
 .vscode/settings.json
 bin/siege.pdb
 bin/siege.ilk
+assets/

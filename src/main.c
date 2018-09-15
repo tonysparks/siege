@@ -15,15 +15,13 @@
 #include "game.c"
 #include "renderer.c"
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmdLine, int nCmdShow) {
-    
+int main(int argv, char** args) {
     GameConfig config = {
         .windowWidth = 600,
         .windowHeight = 480,
         .title = "Logistic Siege"
     };
-
-    OutputDebugStringA("Hello World");
+    
     Game* game = gameInit(&config);
     
     gameRun(game);
