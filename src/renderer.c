@@ -1,25 +1,40 @@
 #include "renderer.h"
+#include "texture_manager.h"
 
+static TextureManager* texManager = NULL;
+static SDL_Renderer*   renderer   = NULL;
 
-Maybe textureLoad(Game* game, Texture* texture, const char* filename) {
-    SDL_Texture* tex = IMG_LoadTexture(game->renderer, filename);
-    if(!tex) {
-        logger(ERROR_LEVEL, "Failed to load texture '%s' : %s", filename, IMG_GetError());
-        return FAILED;
-    }
-
-    texture->tex = tex;
-    SDL_QueryTexture(tex, NULL, NULL, &texture->width, &texture->height);
-    return OK;
+void rendererInit(Game* game) {
+    texManager = game->textureManager;
+    renderer   = game->renderer;
 }
 
-void textureFree(Texture* texture) {
-    if(texture) {
-        if(texture->tex) {
-            SDL_DestroyTexture(texture->tex);
-            texture->tex = NULL;            
-        }
-        texture->width = 0;
-        texture->height = 0;
+void rendererFree() {
+    texManager = NULL;
+    renderer   = NULL;
+}
+
+void drawTexture(TextureId texId, Vec2 pos) {
+    Texture* tex = textureManagerGetTexture(texManager, texId);
+    if(tex) {
+        SDL_Rect dest = {
+            pos[0], pos[1], tex->width, tex->height
+        };
+
+        SDL_RenderCopy(renderer, tex->tex, NULL, &dest);
+    }
+}
+void drawSubTexture(TextureId texId, Vec2 pos, Rect rect) {
+    Texture* tex = textureManagerGetTexture(texManager, texId);
+    if(tex) {
+        SDL_Rect src = {
+            rect.x, rect.y, rect.w, rect.h
+        };
+
+        SDL_Rect dest = {
+            pos[0], pos[1], rect.w, rect.h
+        };
+
+        SDL_RenderCopy(renderer, tex->tex, &src, &dest);
     }
 }

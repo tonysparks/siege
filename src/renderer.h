@@ -5,14 +5,9 @@
 #include "common.h"
 #include "game.h"
 
-typedef struct Texture {
-    int     width;
-    int     height;
+void rendererInit(Game* game);
+void rendererFree();
 
-    SDL_Texture* tex;
-} Texture;
-
-Maybe textureLoad(Game* game, Texture* texture, const char* filename);
-void  textureFree(Texture* texture);
-
+void drawTexture(TextureId texId, Vec2 pos);
+void drawSubTexture(TextureId texId, Vec2 pos, Rect rect);
 #endif

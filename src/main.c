@@ -10,10 +10,14 @@
 #include <Windows.h>
 
 #include <SDL.h>
+#include "SDL_ttf.h"
 
 #include "common.c"
+#include "texture_manager.c"
+#include "sound_manager.c"
 #include "game.c"
 #include "renderer.c"
+
 
 int main(int argv, char** args) {
     GameConfig config = {

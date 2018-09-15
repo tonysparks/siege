@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+struct TextureManager;
+
 typedef struct GameConfig {
     int windowWidth;
     int windowHeight;
@@ -9,6 +11,8 @@ typedef struct GameConfig {
 
 typedef struct Game {
     int     isRunning;
+
+    struct TextureManager* textureManager;
 
     GameConfig*     config;
     SDL_Window*     window;
