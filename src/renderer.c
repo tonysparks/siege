@@ -129,15 +129,16 @@ void drawText(FontId fid, Color* color, Vec2 pos, const char* format, ...) {
             }
 
             font->surface = textSurface;
-
-            SDL_Rect dest = {
-                .x = pos[0],
-                .y = pos[1],
-                .w = screen->w,
-                .h = screen->h,
-            };
             
-            SDL_BlitSurface(font->surface, &dest, screen, NULL);
+            SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, textSurface);
+            if(tex) {
+                SDL_Rect dest = {
+                    pos[0], pos[1], textSurface->w, textSurface->h
+                };
+
+                SDL_RenderCopy(renderer, tex, NULL, &dest);
+                SDL_DestroyTexture(tex);
+            }
         }
 
 
