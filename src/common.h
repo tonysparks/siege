@@ -20,6 +20,11 @@ void* siegeCalloc(size_t count, size_t size);
 void* siegeRealloc(void* ptr, size_t newSize);
 void  siegeFree(void* mem);
 
+typedef struct TimeStep {
+    long    frameTime;          /* time from last frame */
+    long    gameClock;          /* current game clock */
+    double  frameTimeFraction;  /* time from last frame in fractions of seconds */
+} TimeStep;
 
 /*
 ==============================================
@@ -63,6 +68,7 @@ typedef struct Rect {
 } Rect;
 
 #define rectSetPos(r,pos) ((r).x = pos[0], (r).y = pos[1])
+#define rectClear(r) ((r).x = (r).y = (r).w = (r).h = 0)
 
 /*
 ==============================================
