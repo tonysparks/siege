@@ -32,7 +32,7 @@ static void gameRender(Game* game) {
     Vec2 pos = {20, 20};
    // drawTexture(hero, pos);
 
-    drawSprite(guy);
+  //  drawSprite(guy);
 
     Color color = {
         .r = 1,
@@ -40,7 +40,7 @@ static void gameRender(Game* game) {
         .b = 0,
         .a = 1
     };
-    drawText(fontId, &color, pos, "Hello '%s' \n", "there");
+    drawText(fontId, &color, pos, "Hello '%s'", "there");
     SDL_RenderPresent(game->renderer);
 }
 
