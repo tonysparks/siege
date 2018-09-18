@@ -9,8 +9,8 @@ static Maybe textureLoad(SDL_Renderer* renderer, Texture* texture, const char* f
     }
 
     texture->tex = tex;
-    texture->filename = filename;
-
+    strcpy(texture->filename, filename);
+    
     SDL_QueryTexture(tex, NULL, NULL, &texture->width, &texture->height);
     return OK;
 }
@@ -23,7 +23,7 @@ static void textureFree(Texture* texture) {
         }
         texture->width = 0;
         texture->height = 0;
-        texture->filename = NULL;
+        memset(texture->filename, 0, MAX_PATH);
     }
 }
 
@@ -82,6 +82,7 @@ TextureId textureManagerLoadTexture(TextureManager* tm, const char* filename) {
 
     if(!texture) {
         texture = (Texture*) siegeMalloc(sizeof(Texture));
+        memset(texture->filename, 0, MAX_PATH);
         stb_sb_push(tm->textureArray, texture);
         texId = stb_sb_count(tm->textureArray);
     }

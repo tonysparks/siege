@@ -1,6 +1,15 @@
 #ifndef GAME_H
 #define GAME_H
 
+// 1.333 aspect
+//256x192
+//480x360
+//512x384
+
+// 1.777 aspect
+#define WORLD_WIDTH 480
+#define WORLD_HEIGHT 270
+
 struct TextureManager;
 
 typedef struct GameConfig {

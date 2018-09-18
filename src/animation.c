@@ -18,6 +18,8 @@ size_t animationUpdate(Animation* anim, TimeStep* timeStep) {
 
         animationSetCurrentFrame(anim, desiredFrame);
     }
+
+    return anim->currentFrame;
 }
 
 void   animationPlay(Animation* anim) {

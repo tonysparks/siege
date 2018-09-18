@@ -9,7 +9,7 @@ struct Game;
 typedef int TextureId;
 
 typedef struct Texture {
-    const char* filename;
+    char    filename[MAX_PATH];
     int     width;
     int     height;
 

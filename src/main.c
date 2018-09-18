@@ -15,14 +15,17 @@
 #include "common.c"
 #include "texture_manager.c"
 #include "sound_manager.c"
+#include "animation.c"
+#include "model.c"
 #include "game.c"
 #include "renderer.c"
 
 
 int main(int argv, char** args) {
     GameConfig config = {
-        .windowWidth = 600,
-        .windowHeight = 480,
+        // 640x480 native resolution (1.33)
+        .windowWidth = 640,
+        .windowHeight = 360,
         .title = "Logistic Siege"
     };
     

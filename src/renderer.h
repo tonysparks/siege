@@ -37,7 +37,7 @@ typedef struct Sprite {
 typedef int SpriteId;
 
 typedef struct Font {
-    const char* filename;
+    char        filename[256];
     int         size;
     TTF_Font*   font;
     SDL_Surface* surface;

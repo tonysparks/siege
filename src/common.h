@@ -1,6 +1,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#ifndef MAX_PATH
+    #define MAX_PATH 256
+#endif
+
 typedef enum LogLevel {
     INFO_LEVEL,
     DEBUG_LEVEL,

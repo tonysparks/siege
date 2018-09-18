@@ -24,7 +24,7 @@ void rendererInit(Game* game) {
 
     for(int i = 0; i < MAX_FONTS; ++i) {
         Font* font = &fonts[i];
-        font->filename = NULL;
+        memset(font->filename, 0, MAX_PATH);
         font->font = NULL;
         font->surface = NULL;
         font->size = 0;
@@ -41,8 +41,8 @@ void rendererFree() {
         if(font->font) {
             freeFont(i);
         }
+        memset(font->filename, 0, MAX_PATH);
         font->surface = NULL;
-        font->filename = NULL;
         font->font = NULL;
         font->size = 0;
     }
@@ -54,14 +54,13 @@ void rendererFree() {
 
 FontId loadFont(const char* filename, int size) {    
     for(int i = 0; i < MAX_FONTS; ++i) {
-        Font* font = &fonts[i];
-        if(font->filename) {
-            if(!strcmp(filename, font->filename)) {
-                if(font->size == size) {
-                    return i;
-                }
+        Font* font = &fonts[i];        
+        if(!strcmp(filename, font->filename)) {
+            if(font->size == size) {
+                return i;
             }
         }
+        
     }
 
     for(int i = 0; i < MAX_FONTS; ++i) {
@@ -72,8 +71,8 @@ FontId loadFont(const char* filename, int size) {
                 logger(ERROR_LEVEL, "Unable to load font '%s' : %s \n", filename, TTF_GetError());
                 return -1;
             }
+            strcpy(font->filename, filename);
             font->surface = NULL;
-            font->filename = filename;
             font->font = f;
             font->size = size;
             return i;
@@ -86,8 +85,9 @@ FontId loadFont(const char* filename, int size) {
 }
 void   freeFont(FontId fid) {
     if(IS_VALID_FONTID(fid)) {
-        Font* font = &font[fid];
-        font->filename = NULL;
+        Font* font = &fonts[fid];
+        memset(font->filename, 0, MAX_PATH);
+
         font->size = 0;
         if(font->font) {
             TTF_CloseFont(font->font);
@@ -188,7 +188,7 @@ SpriteId allocSprite(TextureId texId) {
 
                 VectorClear(sprite->pos);                
                 VectorSet(sprite->rotationPos, tex->width/2, tex->height/2);                
-                sprite->color.a = sprite->color.g = sprite->color.b = sprite->color.a = 1;
+                sprite->color.r = sprite->color.g = sprite->color.b = sprite->color.a = 1;
 
                 return i;
             }

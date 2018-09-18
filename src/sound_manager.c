@@ -4,7 +4,7 @@
 #define MAX_CHANNELS 128
 
 typedef struct Sound {
-    const char* filename;
+    char       filename[MAX_PATH];
     Mix_Chunk* sample;
 } Sound;
 
@@ -47,11 +47,9 @@ void soundManagerFree() {
 SoundId loadSound(const char* filename) {
     for(int i = 0; stb_sb_count(soundManager.sounds); i++) {
         Sound* sound = soundManager.sounds[i];
-        if(sound->filename) {
-            if(!strcmp(sound->filename, filename)) {
-                return i + 1;
-            }
-        }
+        if(!strcmp(sound->filename, filename)) {
+            return i + 1;
+        }        
     }
     
 
@@ -71,7 +69,7 @@ SoundId loadSound(const char* filename) {
 
     if(!sound) {
         sound = (Sound*) siegeMalloc(sizeof(Sound));
-        sound->filename = NULL;
+        memset(sound->filename, 0, MAX_PATH);
         sound->sample = NULL;
         stb_sb_push(soundManager.sounds, sound);
         soundId = stb_sb_count(soundManager.sounds);
@@ -83,8 +81,8 @@ SoundId loadSound(const char* filename) {
         logger(ERROR_LEVEL, "Unable to load sound '%s' : %s\n", filename, Mix_GetError());
         return INVALID_SOUNDID;
     }
-
-    sound->filename = filename;
+    
+    strcpy(sound->filename, filename);
     sound->sample = sample;
 
     return soundId; // invalid texture ID
@@ -105,7 +103,7 @@ void freeSound(SoundId soundId) {
     if(sound) {
         Mix_FreeChunk(sound->sample);
         sound->sample = NULL;
-        sound->filename = NULL;
+        memset(sound->filename, 0, MAX_PATH);
     }
 }
 
