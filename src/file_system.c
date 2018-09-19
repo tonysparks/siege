@@ -10,7 +10,7 @@ void fileSystemInit(const char* arg) {
         logger(FATAL_LEVEL, "Unable to initialize file system: %s \n", PHYSFS_getError());
     }
 
-    const char* baseDir = SDL_GetBasePath();
+    char* baseDir = SDL_GetBasePath();
     logger(INFO_LEVEL, "Base directory path: '%s' \n", baseDir);
 
     if(!PHYSFS_mount(baseDir, NULL, 0)) {
@@ -21,6 +21,16 @@ void fileSystemInit(const char* arg) {
     if(!PHYSFS_mount(assetsDir, NULL, 0)) {
         logger(FATAL_LEVEL, "Unable to mount base directory '%s' with file system: %s \n", assetsDir, PHYSFS_getError());
     }
+
+    char **rc = PHYSFS_enumerateFiles("/");
+    char **i = NULL;
+    for(i=rc; *i != NULL; ++i) {
+        // TODO: if ends with pak, append to physfs assets
+        printf("Pak file: '%s' \n", *i);
+    }
+
+    SDL_free(baseDir); 
+    PHYSFS_freeList(rc);
 }
 
 
