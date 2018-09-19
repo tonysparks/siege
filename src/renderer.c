@@ -1,6 +1,6 @@
 #include "renderer.h"
 #include "texture_manager.h"
-
+#include "file_system.h"
 
 static TextureManager* texManager = NULL;
 static SDL_Renderer*   renderer   = NULL;
@@ -66,7 +66,7 @@ FontId loadFont(const char* filename, int size) {
     for(int i = 0; i < MAX_FONTS; ++i) {
         Font* font = &fonts[i];
         if(!font->font) {
-            TTF_Font* f = TTF_OpenFont(filename, size);
+            TTF_Font* f = TTF_OpenFontRW(fileSystemReadFully(filename), 1, size);
             if(!f) {
                 logger(ERROR_LEVEL, "Unable to load font '%s' : %s \n", filename, TTF_GetError());
                 return -1;

@@ -1,6 +1,8 @@
 #include "sound_manager.h"
 #include <string.h>
 
+#include "file_system.h"
+
 #define MAX_CHANNELS 128
 
 typedef struct Sound {
@@ -76,7 +78,7 @@ SoundId loadSound(const char* filename) {
     }
 
 
-    Mix_Chunk* sample = Mix_LoadWAV(filename);
+    Mix_Chunk* sample = Mix_LoadWAV_RW(fileSystemReadFully(filename), 1);
     if(!sample) {
         logger(ERROR_LEVEL, "Unable to load sound '%s' : %s\n", filename, Mix_GetError());
         return INVALID_SOUNDID;

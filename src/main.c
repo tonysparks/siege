@@ -13,6 +13,7 @@
 #include "SDL_ttf.h"
 
 #include "common.c"
+#include "file_system.c"
 #include "texture_manager.c"
 #include "sound_manager.c"
 #include "animation.c"

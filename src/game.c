@@ -108,6 +108,7 @@ Game* gameInit(GameConfig* config) {
         return NULL;
     }
 
+    fileSystemInit(NULL);
 
     Game* game = (Game*)siegeMalloc(sizeof(Game));
     game->config = config;
@@ -121,7 +122,7 @@ Game* gameInit(GameConfig* config) {
     rendererInit(game);
 // Test Code
 
-    hero = textureManagerLoadTexture(game->textureManager, "../assets/gfx/german_south_fire.png");
+    hero = textureManagerLoadTexture(game->textureManager, "gfx/german_south_fire.png");
 
     float x = 16;
     float y = 8;
@@ -143,9 +144,9 @@ Game* gameInit(GameConfig* config) {
         }
     }
     
-    fontId = loadFont("../assets/gfx/fonts/courier_new.ttf", 11);
-  //  SoundId zingId = loadSound("../assets/sfx/bullet_zing01.wav");
-   // SoundSource source = playSound(zingId, -1);
+    fontId = loadFont("gfx/fonts/courier_new.ttf", 11);
+    //SoundId zingId = loadSound("sfx/bullet_zing01.wav");
+    //SoundSource source = playSound(zingId, -1);
 
     return game;
 }
@@ -165,6 +166,7 @@ void  gameFree(Game* game) {
 
     rendererFree();
     soundManagerFree();
+    fileSystemFree();
 
     TTF_Quit();
     IMG_Quit();

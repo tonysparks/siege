@@ -1,8 +1,11 @@
 #include "texture_manager.h"
 #include "SDL_image.h"
 
+#include "file_system.h"
+
 static Maybe textureLoad(SDL_Renderer* renderer, Texture* texture, const char* filename) {
-    SDL_Texture* tex = IMG_LoadTexture(renderer, filename);
+    //SDL_Texture* tex = IMG_LoadTexture(renderer, filename);
+    SDL_Texture* tex = IMG_LoadTexture_RW(renderer, fileSystemReadFully(filename), 1);
     if(!tex) {
         logger(ERROR_LEVEL, "Failed to load texture '%s' : %s", filename, IMG_GetError());
         return FAILED;
