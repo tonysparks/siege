@@ -6,6 +6,8 @@
 #include "SDL.h"
 #include "SDL_image.h"
 
+#include "console.h"
+
 #include "texture_manager.h"
 #include "sound_manager.h"
 
@@ -38,6 +40,8 @@ static void gameUpdate(Game* game, TimeStep* timeStep) {
         }    
     }
 
+    consoleUpdate(timeStep);
+
     modelUpdate(&fireModel, timeStep);
 
 }
@@ -61,6 +65,8 @@ static void gameRender(Game* game) {
 
     modelDraw(&fireModel);
 
+    consoleDraw();
+    
     SDL_RenderPresent(game->renderer);
 }
 
@@ -109,6 +115,7 @@ Game* gameInit(GameConfig* config) {
     }
 
     fileSystemInit(NULL);
+    consoleInit();
 
     Game* game = (Game*)siegeMalloc(sizeof(Game));
     game->config = config;
@@ -148,6 +155,8 @@ Game* gameInit(GameConfig* config) {
     //SoundId zingId = loadSound("sfx/bullet_zing01.wav");
     //SoundSource source = playSound(zingId, -1);
 
+    consolePrintf("This\nis a\ntest\n");
+
     return game;
 }
 
@@ -167,6 +176,8 @@ void  gameFree(Game* game) {
     rendererFree();
     soundManagerFree();
     fileSystemFree();
+
+    consoleFree();
 
     TTF_Quit();
     IMG_Quit();

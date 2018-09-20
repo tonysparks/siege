@@ -15,11 +15,12 @@
 #include "common.c"
 #include "file_system.c"
 #include "texture_manager.c"
+#include "renderer.c"
+#include "console.c"
 #include "sound_manager.c"
 #include "animation.c"
 #include "model.c"
 #include "game.c"
-#include "renderer.c"
 
 
 int main(int argv, char** args) {

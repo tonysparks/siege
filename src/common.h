@@ -5,6 +5,9 @@
     #define MAX_PATH 256
 #endif
 
+#define MIN(x,y) ((x) < (y) ? (x) : (y))
+#define MAX(x,y) ((x) > (y) ? (x) : (y))
+
 typedef enum LogLevel {
     INFO_LEVEL,
     DEBUG_LEVEL,
