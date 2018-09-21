@@ -155,7 +155,8 @@ Game* gameInit(GameConfig* config) {
     //SoundId zingId = loadSound("sfx/bullet_zing01.wav");
     //SoundSource source = playSound(zingId, -1);
 
-    consolePrintf("This\nis a\ntest\n");
+    consolePrintf("This\nis a\ntest\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n11\n22\n33\n44\n55\n66\n77\n88\n99\n00\n");
+    consolePrintf("End!\n");
 
     return game;
 }

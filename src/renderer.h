@@ -51,6 +51,7 @@ void rendererFree();
 
 FontId loadFont(const char* filename, int size);
 void   freeFont(FontId fid);
+Maybe  fontWidthHeight(FontId fid, int* width, int* height, const char* format, ...);
 
 void drawText(FontId fid, Color* color, Vec2 pos, const char* format, ...);
 

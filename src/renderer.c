@@ -2,6 +2,8 @@
 #include "texture_manager.h"
 #include "file_system.h"
 
+#define MAX_TEXT_LENGTH 1024
+
 static TextureManager* texManager = NULL;
 static SDL_Renderer*   renderer   = NULL;
 static SDL_Surface*    screen     = NULL;
@@ -100,14 +102,34 @@ void   freeFont(FontId fid) {
     }
 }
 
-void drawText(FontId fid, Color* color, Vec2 pos, const char* format, ...) {
+Maybe fontWidthHeight(FontId fid, int* width, int* height, const char* format, ...) {
+    static char text[MAX_TEXT_LENGTH];
+
     if(IS_VALID_FONTID(fid)) {
         Font* font = &fonts[fid];
 
-        char text[1024];
         va_list args;
         va_start(args, format);
-        vsprintf_s(text, 1024, format, args);
+        vsprintf_s(text, MAX_TEXT_LENGTH, format, args);
+        va_end(args);   
+
+        if(!TTF_SizeText(font->font, text, width, height)) {
+            return OK;
+        }
+    }
+
+    return FAILED;
+}
+
+void drawText(FontId fid, Color* color, Vec2 pos, const char* format, ...) {
+    static char text[MAX_TEXT_LENGTH];
+
+    if(IS_VALID_FONTID(fid)) {
+        Font* font = &fonts[fid];
+
+        va_list args;
+        va_start(args, format);
+        vsprintf_s(text, MAX_TEXT_LENGTH, format, args);
         va_end(args);   
 
         SDL_Color c = {
