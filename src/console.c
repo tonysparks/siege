@@ -41,7 +41,7 @@ static int cmdFontHeight = 0;
 
 static int cmdScrollHeight = 0;
 static int cmdHeight = 0;
-#define CMD_MAX_HEIGHT = 300
+#define CMD_MAX_HEIGHT 100
 
 void consoleInit() {    
     cmdTextBuffer.numberOfLines = 0;    
@@ -68,6 +68,10 @@ void consoleInit() {
     int height = 0;
     fontWidthHeight(cmdFontId, &width, &height, "W");
     cmdFontHeight = height;
+
+    // temp
+    cmdHeight = CMD_MAX_HEIGHT;
+    cmdScrollHeight = 2;
 }
 
 void consoleFree() {
@@ -92,12 +96,11 @@ void consolePrintf(const char* format, ...) {
             cmdTextBuffer.start = &cmdTextBuffer.text[0];\
       }                                                  \
     } while(0)
+    CHECK_END();
 
     va_list args;
     va_start(args, format);
-    CHECK_END();
-
-    int numberOfChars = vsprintf_s(cmdTextBuffer.end->line, MAX_INPUT_BUFFER, format, args);    
+    vsprintf_s(cmdTextBuffer.end->line, MAX_INPUT_BUFFER, format, args);    
     va_end(args);
 
     TextLine* newLine = cmdTextBuffer.end;
@@ -105,8 +108,6 @@ void consolePrintf(const char* format, ...) {
     char* start = line;
     size_t n = 0;
     
-    printf("Original Line: '%s \n", cmdTextBuffer.end->line);
-
     while(*line) {
         char c = *line++;
         n++;
@@ -121,8 +122,6 @@ void consolePrintf(const char* format, ...) {
                 strncpy(cmdTextBuffer.end->line, start, n);
                 cmdTextBuffer.end->line[n - 1] = '\0';
             }
-
-            printf("Line: '%s' \n", cmdTextBuffer.end->line);
 
             cmdTextBuffer.end = cmdTextBuffer.end->next;
             CHECK_END();
@@ -237,10 +236,21 @@ void consoleDraw() {
 
     int currentLineNumber = 0;
     TextLine* current = start;
-    while(current != end) {        
+    while(current != end) {  
+
+        if(currentLineNumber < lineNumberStartRendering) {
+            goto finish;
+        }
+
+        if(pos[1] > CMD_MAX_HEIGHT) {
+            return;
+        }
+
         drawText(cmdFontId, &fontColor, pos, current->line);
         pos[1] += cmdFontHeight;
 
+    finish:
+        currentLineNumber++;
         current = current->next;
     }
 }

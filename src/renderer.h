@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "game.h"
+#include "texture_manager.h"
 
 typedef struct Color {
     union {

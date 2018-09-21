@@ -10,8 +10,9 @@
 
 #include "texture_manager.h"
 #include "sound_manager.h"
-
 #include "model.h"
+
+#include "input_system.h"
 
 static TextureId hero = 0;
 static FontId fontId  = -1;
@@ -37,8 +38,13 @@ static void gameUpdate(Game* game, TimeStep* timeStep) {
                 game->isRunning = 0;
                 break;
             }
+            default: {
+                inputSystemHandleEvent(&event);
+            }
         }    
     }
+
+    inputSystemUpdate(timeStep);
 
     consoleUpdate(timeStep);
 
