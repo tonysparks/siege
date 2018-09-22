@@ -4,35 +4,22 @@
 #include <SDL.h>
 #include "common.h"
 
-/*
-typedef enum KeyEventFlags {
-    KEY_RELEASED   = (1<<1),
-    KEY_PRESSED    = (1<<2),
-    ALT_PRESSED    = (1<<3),
-    SHIFT_PRESSED  = (1<<4),
-    CTRL_PRESSED   = (1<<5),
-} KeyEventFlags;
-*/
-
 typedef struct KeyEvent {
     int keyCode;
     SDL_Keymod keymod;
 } KeyEvent;
 
-typedef void (*OnKeyEvent)(KeyEvent event);
-
-
-typedef enum MouseEventFlags {
-    BUTTON_RELEASED   = (1<<1),
-    BUTTON_PRESSED    = (1<<2),
-} MouseEventFlags;
+typedef void (*OnKeyEvent)(KeyEvent* event);
 
 typedef struct MouseEvent {
-    int button;
-    MouseEventFlags flags;
+    int  type;
+    int  button;
+    Vec2 pos;
+    int  flags;
+    int  wheelDirection;
 } MouseEvent;
 
-typedef void (*OnMouseEvent)(MouseEvent event);
+typedef void (*OnMouseEvent)(MouseEvent* event);
 
 void inputSystemInit();
 void inputSystemFree();

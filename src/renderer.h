@@ -11,9 +11,9 @@
 typedef struct Color {
     union {
         struct {
-            float r,g,b,a;
+            uint8_t r,g,b,a;
         };
-        float v[4];
+        int32_t rgba;
     };
 } Color;
 
@@ -50,6 +50,9 @@ typedef int FontId;
 void rendererInit(Game* game);
 void rendererFree();
 
+int rendererGetWidth();
+int rendererGetHeight();
+
 FontId loadFont(const char* filename, int size);
 void   freeFont(FontId fid);
 Maybe  fontWidthHeight(FontId fid, int* width, int* height, const char* format, ...);
@@ -59,6 +62,11 @@ void drawText(FontId fid, Color* color, Vec2 pos, const char* format, ...);
 void drawTexture(TextureId texId, Vec2 pos);
 void drawSubTexture(TextureId texId, Vec2 pos, Rect rect);
 
+void drawRect(Rect rect, Color* color);
+void fillRect(Rect rect, Color* color);
+
+
+void drawLine(Vec2 a, Vec2 b, Color* color);
 
 SpriteId allocSprite(TextureId texId);
 void     freeSprite(SpriteId sid);

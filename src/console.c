@@ -1,6 +1,8 @@
 #include "console.h"
 #include "renderer.h"
 
+#include "input_system.h"
+
 #define MAX_INPUT_BUFFER 1024
 #define MAX_TEXT_LINES 256
 #define MAX_COMMAND_NAME 128
@@ -43,6 +45,34 @@ static int cmdScrollHeight = 0;
 static int cmdHeight = 0;
 #define CMD_MAX_HEIGHT 100
 
+void consoleOnKeyEvent(KeyEvent* event) {
+
+}
+
+void consoleOnMouseEvent(MouseEvent* event) {
+    //event->
+    if(event->type == SDL_MOUSEWHEEL) {
+        if(event->wheelDirection > 0) {
+            cmdScrollHeight++;
+
+            int numLinesVisible = cmdHeight / cmdFontHeight;
+            int max = MAX(cmdTextBuffer.numberOfLines - numLinesVisible, 0);
+            if(cmdScrollHeight > max) {
+                cmdScrollHeight = max;
+            }
+            
+        }
+        else if(event->wheelDirection < 0) {
+            cmdScrollHeight--;
+            if(cmdScrollHeight < 0) {
+                cmdScrollHeight = 0;
+            }
+        }
+
+        //printf("Scroll Height %d \n", cmdScrollHeight);
+    }
+}
+
 void consoleInit() {    
     cmdTextBuffer.numberOfLines = 0;    
     cmdTextBuffer.start = cmdTextBuffer.end = &cmdTextBuffer.text[0];
@@ -51,7 +81,7 @@ void consoleInit() {
             cmdTextBuffer.text[i].next = &cmdTextBuffer.text[i+1];
         }
         else {
-            cmdTextBuffer.text[i].next = NULL;
+            cmdTextBuffer.text[i].next = cmdTextBuffer.start;
         }
         memset(cmdTextBuffer.text[i].line, 0, MAX_INPUT_BUFFER);
     }
@@ -68,6 +98,9 @@ void consoleInit() {
     int height = 0;
     fontWidthHeight(cmdFontId, &width, &height, "W");
     cmdFontHeight = height;
+
+    inputSystemRegisterKeyboardHandler(&consoleOnKeyEvent);
+    inputSystemRegisterMouseHandler(&consoleOnMouseEvent);
 
     // temp
     cmdHeight = CMD_MAX_HEIGHT;
@@ -87,14 +120,11 @@ void consoleFree() {
 
 
 void consolePrintf(const char* format, ...) {
-#define CHECK_END()                                      \
-    do {                                                 \
-      if(!cmdTextBuffer.end) {                           \
-        cmdTextBuffer.end = cmdTextBuffer.start;         \
-        cmdTextBuffer.start = cmdTextBuffer.start->next; \
-        if(!cmdTextBuffer.start)                         \
-            cmdTextBuffer.start = &cmdTextBuffer.text[0];\
-      }                                                  \
+#define CHECK_END()                                        \
+    do {                                                   \
+      if(cmdTextBuffer.end->next == cmdTextBuffer.start) { \
+        cmdTextBuffer.start = cmdTextBuffer.start->next;   \
+      }                                                    \
     } while(0)
     CHECK_END();
 
@@ -220,11 +250,58 @@ void consoleDraw() {
     }
 
     Color fontColor = {
-        .r = 1,
+        .r = 255,
         .g = 0,
         .b = 0,
-        .a = 1
+        .a = 255
     };
+
+    Color bgColor = {
+        .r = 255,
+        .g = 255,
+        .b = 255,
+        .a = 80
+    };
+
+    Color inputBgColor = {
+        .r = 205,
+        .g = 205,
+        .b = 205,
+        .a = 120
+    };
+
+    Color outlineColor = {
+        .r = 0,
+        .g = 0,
+        .b = 0,
+        .a = 255
+    };
+
+    Rect background = {
+        .x = 0,
+        .y = 0,
+        .w = rendererGetWidth(),
+        .h = cmdHeight + cmdFontHeight
+    };
+
+    Rect input = {
+        .x = 0,
+        .y = background.h,
+        .w = rendererGetWidth(),
+        .h = cmdFontHeight + 10
+    };
+
+    fillRect(background, &bgColor);
+    fillRect(input, &inputBgColor);
+
+    Vec2 a;
+    VectorSet(a, 0, input.y);
+
+    Vec2 b;
+    VectorSet(b, background.w, input.y);
+
+    drawLine(a, b, &outlineColor);
+
     Vec2 pos;
     VectorSet(pos, 5, 10);
 

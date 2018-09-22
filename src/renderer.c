@@ -4,9 +4,12 @@
 
 #define MAX_TEXT_LENGTH 1024
 
+// TODO: Create VideoDevice structure for all of these...
 static TextureManager* texManager = NULL;
 static SDL_Renderer*   renderer   = NULL;
 static SDL_Surface*    screen     = NULL;
+static SDL_Window*     window     = NULL;
+
 static Sprite          sprites[MAX_SPRITES];
 static Font            fonts[MAX_FONTS];
 
@@ -18,6 +21,7 @@ void rendererInit(Game* game) {
     texManager = game->textureManager;
     renderer   = game->renderer;
     screen     = game->surface;
+    window     = game->window;
 
     for(int i = 0; i < MAX_SPRITES; ++i) {
         Sprite* sprite = &sprites[i];
@@ -37,6 +41,7 @@ void rendererFree() {
     texManager = NULL;
     renderer   = NULL;
     screen     = NULL;
+    window     = NULL;
 
     for(int i = 0; i < MAX_FONTS; ++i) {
         Font* font = &fonts[i];
@@ -50,6 +55,19 @@ void rendererFree() {
     }
 
     TTF_Quit();
+}
+
+int rendererGetWidth() {
+    int w = 0;
+    SDL_GL_GetDrawableSize(window, &w, NULL);
+
+    return w;
+}
+int rendererGetHeight() {
+    int h = 0;
+    SDL_GL_GetDrawableSize(window, NULL, &h);
+
+    return h;
 }
 
 #define IS_VALID_FONTID(fid) ((fid) > -1 && (fid) < MAX_FONTS)
@@ -133,10 +151,10 @@ void drawText(FontId fid, Color* color, Vec2 pos, const char* format, ...) {
         va_end(args);   
 
         SDL_Color c = {
-            .r = 255 * color->r,
-            .g = 255 * color->g,
-            .b = 255 * color->b,
-            .a = 255 * color->a,
+            .r = color->r,
+            .g = color->g,
+            .b = color->b,
+            .a = color->a,
         };
 
         SDL_Surface* textSurface = TTF_RenderText_Solid(font->font, text, c);
@@ -192,6 +210,44 @@ void drawSubTexture(TextureId texId, Vec2 pos, Rect rect) {
     }
 }
 
+
+void drawRect(Rect rect, Color* color) {
+    SDL_Rect r = {
+        .x = rect.x,
+        .y = rect.y,
+        .w = rect.w,
+        .h = rect.h
+    };
+
+    if(color) {
+        SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, color->a);
+    }
+    SDL_RenderDrawRect(renderer, &r);
+}
+
+
+void fillRect(Rect rect, Color* color) {
+    SDL_Rect r = {
+        .x = rect.x,
+        .y = rect.y,
+        .w = rect.w,
+        .h = rect.h
+    };
+
+    if(color) {
+        SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, color->a);
+    }
+    SDL_RenderFillRect(renderer, &r);
+}
+
+
+void drawLine(Vec2 a, Vec2 b, Color* color) {    
+    if(color) {
+        SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, color->a);
+    }
+    SDL_RenderDrawLine(renderer, a[0], a[1], b[0], b[1]);
+}
+
 #define IS_VALID_SPRITEID(id) ((id) > -1 && (id) < MAX_SPRITES)
 
 SpriteId allocSprite(TextureId texId) {
@@ -210,7 +266,7 @@ SpriteId allocSprite(TextureId texId) {
 
                 VectorClear(sprite->pos);                
                 VectorSet(sprite->rotationPos, tex->width/2, tex->height/2);                
-                sprite->color.r = sprite->color.g = sprite->color.b = sprite->color.a = 1;
+                sprite->color.r = sprite->color.g = sprite->color.b = sprite->color.a = 255;
 
                 return i;
             }

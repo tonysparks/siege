@@ -53,6 +53,7 @@ static void gameUpdate(Game* game, TimeStep* timeStep) {
 }
 
 static void gameRender(Game* game) {
+    SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
     SDL_RenderClear(game->renderer);
     Vec2 pos = {20, 120};
     drawTexture(hero, pos);
@@ -105,8 +106,8 @@ Game* gameInit(GameConfig* config) {
         logger(FATAL_LEVEL, "Unable to create renderer: %s\n", SDL_GetError());
         return NULL;
     }
-
-    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+    
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_RenderSetLogicalSize(renderer, WORLD_WIDTH, WORLD_HEIGHT);
     //SDL_RenderSetIntegerScale(renderer, 1);
 
