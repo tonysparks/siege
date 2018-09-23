@@ -14,6 +14,8 @@
 
 #include "input_system.h"
 
+#include "world.h"
+
 static TextureId hero = 0;
 static FontId fontId  = -1;
 
@@ -30,6 +32,7 @@ static Model fireModel = {
 };
 
 static Game* gGame = NULL;
+static World gWorld;
 
 static void cmdQuit(const char* args) {
     if(gGame) {
@@ -152,6 +155,9 @@ Game* gameInit(GameConfig* config) {
 
     soundManagerInit();
     rendererInit(game);
+
+    worldInit(&gWorld);
+
 // Test Code
 
     hero = textureManagerLoadTexture(game->textureManager, "gfx/german_south_fire.png");
@@ -184,7 +190,7 @@ Game* gameInit(GameConfig* config) {
     //consolePrintf("End!\n");
 
     consoleAddCommand("quit", &cmdQuit);
-    
+
     return game;
 }
 
@@ -206,6 +212,8 @@ void  gameFree(Game* game) {
     fileSystemFree();
 
     consoleFree();
+
+    worldFree(&gWorld);
 
     TTF_Quit();
     IMG_Quit();
