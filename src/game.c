@@ -29,6 +29,14 @@ static Model fireModel = {
     .numOfFrames = 4,
 };
 
+static Game* gGame = NULL;
+
+static void cmdQuit(const char* args) {
+    if(gGame) {
+        gGame->isRunning = 0;
+    }
+}
+
 static void gameUpdate(Game* game, TimeStep* timeStep) {
     SDL_Event event;
 
@@ -36,6 +44,14 @@ static void gameUpdate(Game* game, TimeStep* timeStep) {
         switch(event.type) {
             case SDL_QUIT: {
                 game->isRunning = 0;
+                break;
+            }
+            case SDL_KEYDOWN: {
+                if(event.key.keysym.sym == SDLK_BACKQUOTE) {
+                    consoleToggle();
+                    break;
+                }
+                inputSystemHandleEvent(&event);
                 break;
             }
             default: {
@@ -132,6 +148,8 @@ Game* gameInit(GameConfig* config) {
     game->isRunning = 0;
     game->textureManager = textureManagerInit(game);
 
+    gGame = game;
+
     soundManagerInit();
     rendererInit(game);
 // Test Code
@@ -162,9 +180,11 @@ Game* gameInit(GameConfig* config) {
     //SoundId zingId = loadSound("sfx/bullet_zing01.wav");
     //SoundSource source = playSound(zingId, -1);
 
-    consolePrintf("This\nis a\ntest\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n11\n22\n33\n44\n55\n66\n77\n88\n99\n00\n");
-    consolePrintf("End!\n");
+    //consolePrintf("This\nis a\ntest\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n11\n22\n33\n44\n55\n66\n77\n88\n99\n00\n");
+    //consolePrintf("End!\n");
 
+    consoleAddCommand("quit", &cmdQuit);
+    
     return game;
 }
 

@@ -5,7 +5,7 @@
 
 #define MAX_INPUT_BUFFER 128
 #define MAX_TEXT_LINES 256
-#define MAX_COMMAND_NAME 128
+#define MAX_COMMAND_NAME 32
 
 typedef struct Commands {
     Command  cmd;
@@ -33,7 +33,10 @@ typedef enum ConsoleState {
 } ConsoleState;
 
 #define CMD_MAX_HEIGHT 100
+#define CMD_MIN_HEIGHT -40
 #define CMD_BLINK_TIME 200
+#define CMD_CLOSE_SPEED 15
+#define CMD_OPEN_SPEED  20
 
 static TextBuffer cmdTextBuffer;
 static char cmdInputBuffer[MAX_INPUT_BUFFER];
@@ -47,9 +50,38 @@ static FontId cmdFontId = -1;
 static int cmdFontHeight = 0;
 
 static int cmdScrollHeight = 0;
-static int cmdHeight = 0;
+static float cmdHeight = CMD_MIN_HEIGHT;
 static int cmdBlinkTimer = CMD_BLINK_TIME;
 static int cmdShowCursor = 1;
+
+static Color cmdFontColor = {
+    .r = 0,
+    .g = 255,
+    .b = 0,
+    .a = 255
+};
+
+static Color cmdBackgroundColor = {
+    .r = 255,
+    .g = 255,
+    .b = 255,
+    .a = 80
+};
+
+static Color cmdInputBgColor = {
+    .r = 205,
+    .g = 205,
+    .b = 205,
+    .a = 120
+};
+
+static Color cmdOutlineColor = {
+    .r = 0,
+    .g = 0,
+    .b = 0,
+    .a = 255
+};
+
 
 static char cmdShiftChar[255] = {
     ['1'] = '!',
@@ -85,7 +117,15 @@ static void cmdClear(const char* args) {
     cmdScrollHeight = 0;
 }
 
-static void scrollUp() {
+static void cmdList(const char* args) {
+    Commands* cmds = cmdCommands;
+    while(cmds) {
+        consolePrintf("%s\n", cmds->name);
+        cmds = cmds->next;
+    }
+}
+
+static void consoleScrollUp() {
     cmdScrollHeight++;
 
     int numLinesVisible = cmdHeight / cmdFontHeight;
@@ -95,11 +135,54 @@ static void scrollUp() {
     }
 }
 
-static void scrollDown() {
+static void consoleScrollDown() {
     cmdScrollHeight--;
     if(cmdScrollHeight < 0) {
         cmdScrollHeight = 0;
     }
+}
+
+static void consoleTabComplete() {
+    static Commands* matches[24];
+
+    if(cmdInputBufferSize < 1) {
+        return;
+    }
+
+    for(size_t i = 0; i < 24; i++) {
+        matches[i] = NULL;
+    }
+    size_t numOfMatches = 0;
+
+    char* input = cmdInputBuffer;
+
+
+    Commands* c = cmdCommands;
+    while(c) {
+        if(!strncmp(c->name, input, cmdInputBufferSize)) {
+            matches[numOfMatches++] = c;
+        }
+        
+        c = c->next;
+    }
+
+    if(numOfMatches == 1) {
+        Commands* cmd = matches[0];
+        strcpy(cmdInputBuffer, cmd->name);
+        cmdInputBufferSize = strlen(cmd->name) + 1;
+        cmdInputBuffer[cmdInputBufferSize-1] = ' ';
+        cmdInputBuffer[cmdInputBufferSize  ] = '\0';
+
+        cmdInputBufferPos = cmdInputBufferSize;
+    }
+    else if(numOfMatches > 1) {
+        for(size_t i = 0; i < numOfMatches; i++) {
+            consolePrintf("%s\n", matches[i]->name);
+        }
+
+        consolePrintf("%s", "\n");
+    }
+
 }
 
 static void consoleOnKeyEvent(KeyEvent* event) {
@@ -154,11 +237,11 @@ static void consoleOnKeyEvent(KeyEvent* event) {
             break;
         }
         case SDLK_PAGEUP: {
-            scrollUp();
+            consoleScrollUp();
             break;
         }
         case SDLK_PAGEDOWN: {
-            scrollDown();
+            consoleScrollDown();
             break;
         }
         case SDLK_HOME: {
@@ -167,6 +250,10 @@ static void consoleOnKeyEvent(KeyEvent* event) {
         }
         case SDLK_END: {
             cmdInputBufferPos = cmdInputBufferSize;
+            break;
+        }
+        case SDLK_TAB: {
+            consoleTabComplete();
             break;
         }
         case SDLK_RETURN: {
@@ -212,16 +299,20 @@ static void consoleOnKeyEvent(KeyEvent* event) {
 static void consoleOnMouseEvent(MouseEvent* event) {
     if(event->type == SDL_MOUSEWHEEL) {
         if(event->wheelDirection > 0) {
-            scrollUp();
+            consoleScrollUp();
             
         }
         else if(event->wheelDirection < 0) {
-            scrollDown();
+            consoleScrollDown();
         }
     }
 }
 
 void consoleInit() {    
+    cmdHeight = CMD_MIN_HEIGHT;
+    cmdScrollHeight = 0;
+    cmdIsActive = 0;
+
     cmdTextBuffer.numberOfLines = 0;    
     cmdTextBuffer.start = cmdTextBuffer.end = &cmdTextBuffer.text[0];
     for(int i = 0; i < MAX_TEXT_LINES; ++i) {
@@ -251,11 +342,7 @@ void consoleInit() {
     inputSystemRegisterMouseHandler(&consoleOnMouseEvent);
 
     consoleAddCommand("clear", &cmdClear);
-
-    // temp
-    cmdHeight = CMD_MAX_HEIGHT;
-    cmdScrollHeight = 0;
-    cmdIsActive = 1;
+    consoleAddCommand("cmdlist", &cmdList);
 }
 
 void consoleFree() {
@@ -341,13 +428,15 @@ void consoleExecute(const char* format, ...) {
     char* cmdName = text;
     size_t pos = 0;
     while(pos < len) {
-        char c = text[pos++];
+        char c = text[pos];
         if(c == ' ') {
             break;
         }
         if(c == '\0') {
             break;
         }
+
+        pos++;
     }
 
     Commands* cmd = consoleFindCommand(text, pos);
@@ -433,6 +522,27 @@ void consoleUpdate(TimeStep* timeStep) {
         cmdBlinkTimer = CMD_BLINK_TIME;
         cmdShowCursor = !cmdShowCursor;
     }
+
+    if(cmdState == OPENING) {
+        if(cmdHeight < CMD_MAX_HEIGHT) {
+            cmdHeight += CMD_OPEN_SPEED;
+        }
+
+        if(cmdHeight > CMD_MAX_HEIGHT) {
+            cmdHeight = CMD_MAX_HEIGHT;
+            cmdState = NONE;
+        }        
+    }
+    else if(cmdState == CLOSING) {
+        if(cmdHeight > CMD_MIN_HEIGHT) {
+            cmdHeight -= CMD_CLOSE_SPEED;
+        }
+
+        if(cmdHeight < CMD_MIN_HEIGHT) {
+            cmdHeight = CMD_MIN_HEIGHT;
+            cmdState = NONE;
+        }
+    }
 }
 
 
@@ -443,33 +553,9 @@ void consoleDraw() {
         return;
     }
 
-    Color fontColor = {
-        .r = 255,
-        .g = 0,
-        .b = 0,
-        .a = 255
-    };
-
-    Color bgColor = {
-        .r = 255,
-        .g = 255,
-        .b = 255,
-        .a = 80
-    };
-
-    Color inputBgColor = {
-        .r = 205,
-        .g = 205,
-        .b = 205,
-        .a = 120
-    };
-
-    Color outlineColor = {
-        .r = 0,
-        .g = 0,
-        .b = 0,
-        .a = 255
-    };
+    if(cmdHeight == CMD_MIN_HEIGHT) {
+        return;
+    }
 
     Rect background = {
         .x = 0,
@@ -485,29 +571,33 @@ void consoleDraw() {
         .h = cmdFontHeight + 10
     };
 
-    fillRect(background, &bgColor);
-    fillRect(input, &inputBgColor);
+    fillRect(background, &cmdBackgroundColor);
 
-    Vec2 a;
-    VectorSet(a, 0, input.y);
+    /* Draw the input section */
+    {
+        fillRect(input, &cmdInputBgColor);
 
-    Vec2 b;
-    VectorSet(b, background.w, input.y);
+        Vec2 a;
+        VectorSet(a, 0, input.y);
 
-    drawLine(a, b, &outlineColor);
+        Vec2 b;
+        VectorSet(b, background.w, input.y);
 
-    if(cmdInputBufferSize > 0) {
-        VectorSet(a, 3, input.y + 5);
-        drawText(cmdFontId, &fontColor, a, "%s", cmdInputBuffer);
-    }
+        drawLine(a, b, &cmdOutlineColor);
 
-    if(cmdShowCursor) {
-        int textWidth = 0;
-        int textHeight = 0;
-        fontWidthHeightLen(cmdFontId, &textWidth, &textHeight, cmdInputBufferPos, "%s", cmdInputBuffer);
+        if(cmdInputBufferSize > 0) {
+            VectorSet(a, 3, input.y + 5);
+            drawText(cmdFontId, &cmdFontColor, a, "%s", cmdInputBuffer);
+        }
 
-        VectorSet(a, 3 + textWidth, input.y + 5);
-        drawText(cmdFontId, &fontColor, a, "_");
+        if(cmdShowCursor) {
+            int textWidth = 0;
+            int textHeight = 0;
+            fontWidthHeightLen(cmdFontId, &textWidth, &textHeight, cmdInputBufferPos, "%s", cmdInputBuffer);
+
+            VectorSet(a, 3 + textWidth, input.y + 5);
+            drawText(cmdFontId, &cmdFontColor, a, "_");
+        }
     }
 
     /* Draw scrolling text */
@@ -533,7 +623,10 @@ void consoleDraw() {
             return;
         }
 
-        drawText(cmdFontId, &fontColor, pos, "%s", current->line);
+        if(current->line[0] != '\0') {
+            drawText(cmdFontId, &cmdFontColor, pos, "%s", current->line);
+        }
+
         pos[1] += cmdFontHeight;
 
     finish:
