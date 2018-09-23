@@ -2,7 +2,7 @@
 #include "texture_manager.h"
 #include "file_system.h"
 
-#define MAX_TEXT_LENGTH 1024
+#define MAX_TEXT_LENGTH 128
 
 // TODO: Create VideoDevice structure for all of these...
 static TextureManager* texManager = NULL;
@@ -128,7 +128,26 @@ Maybe fontWidthHeight(FontId fid, int* width, int* height, const char* format, .
 
         va_list args;
         va_start(args, format);
-        vsprintf_s(text, MAX_TEXT_LENGTH, format, args);
+        vsnprintf_s(text, MAX_TEXT_LENGTH, MAX_TEXT_LENGTH, format, args);
+        va_end(args);   
+
+        if(!TTF_SizeText(font->font, text, width, height)) {
+            return OK;
+        }
+    }
+
+    return FAILED;
+}
+
+Maybe fontWidthHeightLen(FontId fid, int* width, int* height, size_t length, const char* format, ...) {
+    static char text[MAX_TEXT_LENGTH];
+
+    if(IS_VALID_FONTID(fid)) {
+        Font* font = &fonts[fid];
+
+        va_list args;
+        va_start(args, format);
+        vsnprintf_s(text, MAX_TEXT_LENGTH, MIN(length, MAX_TEXT_LENGTH), format, args);
         va_end(args);   
 
         if(!TTF_SizeText(font->font, text, width, height)) {

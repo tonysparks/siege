@@ -6,7 +6,7 @@
 /**
  * Command that can be executed thru the console
  */
-typedef void (*Command)(const char* format, ...);
+typedef void (*Command)(const char* args);
 
 void consoleInit();
 void consoleFree();

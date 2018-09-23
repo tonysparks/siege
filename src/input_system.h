@@ -5,6 +5,7 @@
 #include "common.h"
 
 typedef struct KeyEvent {
+    int type;
     int keyCode;
     SDL_Keymod keymod;
 } KeyEvent;

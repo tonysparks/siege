@@ -27,15 +27,18 @@ static void inputSystemEmitKeyEvent(SDL_Event* event) {
     KeyEvent keyEvent;
     keyEvent.keyCode = event->key.keysym.sym;
     keyEvent.keymod  = event->key.keysym.mod;
+    keyEvent.type    = event->type;
 
-    Key key = inKeys[keyEvent.keyCode];
-    if(event->type == SDL_KEYDOWN) {
-        if(key.timePressed < 0) {
-            key.timePressed = event->key.timestamp;
+    if(keyEvent.keyCode > -1 && keyEvent.keyCode < 128) {
+        Key key = inKeys[keyEvent.keyCode];
+        if(event->type == SDL_KEYDOWN) {
+            if(key.timePressed < 0) {
+                key.timePressed = event->key.timestamp;
+            }
         }
-    }
-    else {
-        key.timePressed = -1;
+        else {
+            key.timePressed = -1;
+        }
     }
 
     if(!inNumKeyListeners) {
