@@ -8,28 +8,15 @@
 
 #include "console.h"
 
+#include "file_system.h"
 #include "texture_manager.h"
 #include "sound_manager.h"
-#include "model.h"
+
 
 #include "input_system.h"
 
 #include "world.h"
 
-static TextureId hero = 0;
-static FontId fontId  = -1;
-
-static Model fireModel = {
-    .animation = {
-        .numberOfFrames = 4,
-        .elapsedTime = 0,
-        .frameTime = 1140,
-        .currentFrame = 0,
-        .loop = 1,
-        .isPaused = 0
-    },    
-    .numOfFrames = 4,
-};
 
 static Game* gGame = NULL;
 static World gWorld;
@@ -67,32 +54,17 @@ static void gameUpdate(Game* game, TimeStep* timeStep) {
 
     consoleUpdate(timeStep);
 
-    modelUpdate(&fireModel, timeStep);
+    worldUpdate(timeStep);
 
 }
 
 static void gameRender(Game* game) {
     SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
     SDL_RenderClear(game->renderer);
-    Vec2 pos = {20, 120};
-    drawTexture(hero, pos);
 
-  //  drawSprite(guy);
+    worldDraw();
 
-    Color color = {
-        .r = 1,
-        .g = 0,
-        .b = 0,
-        .a = 1
-    };
-    VectorSet(pos, 0, 0);
-    //drawText(fontId, &color, pos, "Hello '%s'", "there");
-    drawText(fontId, &color, pos, "Hello %d %d", fireModel.animation.currentFrame, fireModel.animation.elapsedTime);
-
-    modelDraw(&fireModel);
-
-    consoleDraw();
-    
+    consoleDraw();    
     SDL_RenderPresent(game->renderer);
 }
 
@@ -156,38 +128,7 @@ Game* gameInit(GameConfig* config) {
     soundManagerInit();
     rendererInit(game);
 
-    worldInit(&gWorld);
-
-// Test Code
-
-    hero = textureManagerLoadTexture(game->textureManager, "gfx/german_south_fire.png");
-
-    float x = 16;
-    float y = 8;
-
-    for(size_t i = 0; i < fireModel.numOfFrames; ++i) {
-        SpriteId frame = allocSprite(hero);
-        Sprite* sprite = getSprite(frame);
-        if(sprite) {
-            fireModel.sprites[i] = frame;
-
-            sprite->bounds.x = x;
-            sprite->bounds.y = y;
-            sprite->bounds.w = 35;
-            sprite->bounds.h = 55;
-
-            VectorSet(sprite->pos, 50, 60);        
-            VectorSet(sprite->rotationPos, 0, 0);            
-            x += 64;            
-        }
-    }
-    
-    fontId = loadFont("gfx/fonts/courier_new.ttf", 11);
-    //SoundId zingId = loadSound("sfx/bullet_zing01.wav");
-    //SoundSource source = playSound(zingId, -1);
-
-    //consolePrintf("This\nis a\ntest\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n11\n22\n33\n44\n55\n66\n77\n88\n99\n00\n");
-    //consolePrintf("End!\n");
+    worldInit(&gWorld, game);
 
     consoleAddCommand("quit", &cmdQuit);
 

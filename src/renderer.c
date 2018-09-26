@@ -2,6 +2,8 @@
 #include "texture_manager.h"
 #include "file_system.h"
 
+#include <stdio.h>
+
 #define MAX_TEXT_LENGTH 128
 
 // TODO: Create VideoDevice structure for all of these...

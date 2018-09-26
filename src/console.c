@@ -1,7 +1,17 @@
+// standard includes
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+#include <Windows.h>
+
 #include "console.h"
 #include "renderer.h"
 
 #include "input_system.h"
+
 
 #define MAX_INPUT_BUFFER 128
 #define MAX_TEXT_LINES 256
@@ -43,7 +53,6 @@ static char cmdInputBuffer[MAX_INPUT_BUFFER];
 static int cmdInputBufferPos = 0;
 static int cmdInputBufferSize = 0;
 static Commands* cmdCommands = NULL;
-static long cmdWaitTime = 0;
 static int cmdIsActive = 0;
 static ConsoleState cmdState = NONE;
 static FontId cmdFontId = -1;
@@ -268,7 +277,7 @@ static void consoleOnKeyEvent(KeyEvent* event) {
                 if(cmdInputBufferPos + 1 < MAX_INPUT_BUFFER) {
                     size_t len = cmdInputBufferSize - cmdInputBufferPos;
                     if(len > 0) {
-                        for(int i = 0; i < len; ++i)  {
+                        for(size_t i = 0; i < len; ++i)  {
                             cmdInputBuffer[(cmdInputBufferSize) - i] = cmdInputBuffer[(cmdInputBufferSize-1) - i];
                         }                            
                     }
@@ -279,7 +288,7 @@ static void consoleOnKeyEvent(KeyEvent* event) {
                             c -= 32;
                         }
                         else if(event->keymod & KMOD_SHIFT) {
-                            char alt = cmdShiftChar[c];
+                            char alt = cmdShiftChar[(int)c];
                             if(alt) {
                                 c = alt;
                             }
@@ -405,7 +414,8 @@ void consolePrintf(const char* format, ...) {
 Commands* consoleFindCommand(const char* name, size_t len) {
     Commands* c = cmdCommands;
     while(c) {
-        if(!strncmp(c->name, name, len)) {
+        size_t cmdLen = strlen(c->name);
+        if(cmdLen == len && !strncmp(c->name, name, len)) {
             return c;
         }
         
@@ -416,16 +426,15 @@ Commands* consoleFindCommand(const char* name, size_t len) {
 }
 
 void consoleExecute(const char* format, ...) {
-    static char text[MAX_TEXT_LENGTH];
+    static char text[MAX_INPUT_BUFFER];
 
     va_list args;
     va_start(args, format);
-    int len = vsnprintf_s(text, MAX_TEXT_LENGTH, MAX_INPUT_BUFFER, format, args);
+    int len = vsnprintf_s(text, MAX_INPUT_BUFFER, MAX_INPUT_BUFFER, format, args);
     va_end(args);   
 
     consolePrintf("%s\n", text);
 
-    char* cmdName = text;
     size_t pos = 0;
     while(pos < len) {
         char c = text[pos];
@@ -547,8 +556,6 @@ void consoleUpdate(TimeStep* timeStep) {
 
 
 void consoleDraw() {
-    static char line[MAX_INPUT_BUFFER];
-
     if(!cmdFontHeight) {
         return;
     }

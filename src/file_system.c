@@ -1,6 +1,8 @@
 #include "file_system.h"
 #include "common.h"
 
+#include <stdio.h>
+
 #define FS_MAX_FILE_SIZE (80 * 1024 * 1024)
 
 #define PHYSFS_getError() (PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()))

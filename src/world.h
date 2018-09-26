@@ -3,11 +3,13 @@
 
 #include "common.h"
 
-typedef struct World {
+typedef struct Game Game;
 
+typedef struct World {
+    Game* game;
 } World;
 
-void worldInit(World* w);
+void worldInit(World* w, Game* game);
 void worldFree(World* w);
 
 void worldUpdate(TimeStep* timeStep);

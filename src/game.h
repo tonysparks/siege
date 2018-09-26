@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <SDL.h>
+
 // 1.333 aspect
 //256x192
 //480x360

@@ -102,7 +102,7 @@ void inputSystemUpdate(TimeStep* timeStep) {
 }
 
 void inputSystemGetMousePos(Vec2 mousePos) {
-
+    VectorCopy(inMousePos, mousePos);
 }
 
 void inputSystemRegisterKeyboardHandler(OnKeyEvent onKey) {

@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <stdint.h>
+
 #ifndef MAX_PATH
     #define MAX_PATH 256
 #endif
